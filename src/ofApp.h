@@ -80,6 +80,8 @@ class ofApp : public ofBaseApp, public ofxCvBlobListener
     float       brightness;
     float       contrast;
     bool        bOscCountour;
+    bool        showDebugInterface;
+    bool        showSyphonOutput;
     
     // Buffer for velocity
     map<int, vector <float> > vbuffer;

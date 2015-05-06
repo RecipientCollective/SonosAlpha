@@ -97,18 +97,23 @@ void ofApp::sonoSetup()
     brightness = BRIGHTNESS;
     contrast = CONTRAST;
     bOscCountour = false;
+    showDebugInterface = true;
+    // this runtime option is independent from the DEFINE _USE_SYPHON_VIDEO
+    showSyphonOutput = true;
     
     // BLOB TRACKING
     blobTracker.setListener( this );
     
     // SETUP VBUFFER
     // Crea un buffer (array) size 60 PER OGNI ATTORE (0,1,2)
+    // FIXME hai diviso per 4?
+    
     for (int i =0; i<BLOBMAX; i++)
     {
         vbuffer.insert(pair<int, vector<float> >(i, vector<float>(FRAMERATE/4,0.0)));
         //vx
         vbufferx.insert(pair<int, vector<float> >(i, vector<float>(FRAMERATE/4,0.0)));
-        //vx
+        //vy
         vbuffery.insert(pair<int, vector<float> >(i, vector<float>(FRAMERATE/4,0.0)));
     }
    
@@ -133,6 +138,7 @@ void ofApp::sonoSetup()
     
     // SETUP OSC
     sender.setup(HOST, PORT);
+    
 #ifdef DEBUG
     cerr << "sending osc messages to" << string(HOST) << ":" << ofToString(PORT) << endl;
 #endif
@@ -353,10 +359,16 @@ void ofApp::oscUpdate()
 //--------------------------------------------------------------
 void ofApp::draw()
 {
-    debugDraw();
+    if (showDebugInterface)
+    {
+        debugDraw();
+    }
     
 #ifdef _USE_SYPHON_VIDEO
-    syphonDraw();
+    if (showSyphonOutput)
+    {
+        syphonDraw();
+    }
 #endif
 }
 
@@ -389,9 +401,13 @@ void ofApp::debugDraw()
     }
     
     // finally, a report:
+    string syphon_status = showSyphonOutput ? "active" : "inactive";
+    
     ofSetHexColor(0xffffff);
     stringstream reportStr;
-    reportStr << "bg subtraction and blob detection" << endl
+    reportStr << "[h] hide inteface" << endl
+    << "[s] hide/show syphon output, current status: " << syphon_status << endl
+    << "bg subtraction and blob detection" << endl
     << "press ' ' to capture bg" << endl
     << "threshold " << Threshold << " (press: +/-)" << endl
     << "brightness: " << brightness << " (press: 1/2)" << endl
@@ -534,6 +550,12 @@ void ofApp::keyPressed(int key)
         case '-':
             Threshold --;
             if (Threshold < 0) Threshold = 0;
+            break;
+        case 'h':
+            showDebugInterface = !showDebugInterface;
+            break;
+        case 's':
+            showSyphonOutput = !showSyphonOutput;
             break;
 #ifdef _USE_LIVE_VIDEO
             
